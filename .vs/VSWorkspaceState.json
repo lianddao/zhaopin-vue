@@ -3,8 +3,9 @@
     "",
     "\\src",
     "\\src\\components",
+    "\\src\\components\\JobTypeChildren",
     "\\src\\router"
   ],
-  "SelectedNode": "\\src\\components\\JobInfo.vue",
+  "SelectedNode": "\\src\\components\\Sou.vue",
   "PreviewInSolutionExplorer": false
 }

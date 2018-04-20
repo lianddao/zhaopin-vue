@@ -1,6 +1,6 @@
 <template>
   <div id="app" class="container">
-    <img src="./assets/logo.png">
+    <img src="./assets/logo.png" style="height:50px">
     <keep-alive>
       <router-view class="view"></router-view>
     </keep-alive>
