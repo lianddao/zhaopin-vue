@@ -5,6 +5,7 @@ import Job from '@/components/Job'
 import JobInfo from '@/components/JobInfo'
 import Sou from '@/components/Sou'
 import JobType from '@/components/JobType'
+import HangYeSelector from '@/components/JobSearchChildren/HangYeSelector'
 
 Vue.use(Router)
 
@@ -32,6 +33,10 @@ export default new Router({
     {
       path: '/jobtype',
       component: JobType
+    },
+    {
+      path: '/hangye',
+      component: HangYeSelector
     }
   ]
 })

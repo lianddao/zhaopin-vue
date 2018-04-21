@@ -30,9 +30,9 @@
       <!-- 行业类别 -->
       <b-input-group class="mb-3">
         <b-input-group-prepend>
-          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-job-type>行业类别</b-btn>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-hangye>行业类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="jobTypeName"></b-form-input>
+        <b-form-input v-model="hangYeName"></b-form-input>
       </b-input-group>
 
       <b-button type="button" variant="primary" @click="onSubmit">搜索工作</b-button>
@@ -66,16 +66,19 @@
     <b-modal id="modal-job-type" centered size="lg" title="选择职位" hide-footer>
       <job-type v-on:输出值="jobTypesListener"></job-type>
     </b-modal>
-    <pre>输出值:{{ job_type_selected }}</pre>
 
-    
+    <!-- 选择行业Modal -->
+    <b-modal id="modal-hangye" centered size="lg" title="选择行业" hide-footer>
+      <hang-ye v-on:选择行业="onHangYeSelected"></hang-ye>
+    </b-modal>
+    <pre>输出值:{{ hangYe_selected }}</pre>
 
     <hr />
 
-    <h1>热门职位</h1>
+    <!-- <h1>热门职位</h1>
     <ul class="list-inline row">
       <li class="col-xs-6 col-sm-6 col-md-3" v-for="i in hot" :key="i.id">{{ i.name }}</li>
-    </ul>
+    </ul> -->
     <result :queryUrl="url"></result>
 
   </div>
@@ -86,10 +89,12 @@ import DataSource from './DataSource'
 import CityPop from './CityPop'
 import Result from './Job'
 import JobType from './JobType'
+import HangYe from './JobSearchChildren/HangYeSelector'
 
 export default {
   data() {
     return {
+      hangYe_selected: null,
       job_type_selected: null,
       allSelected: false,
       indeterminate: false,
@@ -98,6 +103,7 @@ export default {
       hot: null,
       sou1: '职位',
       query: {
+        in: '', //行业类别
         bj: '', //职位大分类
         sj: '', //职位小分类,用 ; 隔开
         jl: '广州', //地点
@@ -123,11 +129,18 @@ export default {
     DataSource,
     CityPop,
     Result,
-    JobType
+    JobType,
+    HangYe
   },
   computed: {
     // 行业类别
-
+    hangYeName: {
+      get() {
+        if (this.hangYe_selected == null) return null
+        return this.hangYe_selected.name
+      },
+      set() {}
+    },
 
     // 职位类别
     jobTypeName: {
@@ -186,12 +199,16 @@ export default {
     onSubmit() {
       //http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E5%B9%BF%E5%B7%9E&kw=asp.net&sm=0&p=1&sf=0&st=99999&isadv=1
       var params = {
+        in: null,
         bj: null,
         sj: null,
         jl: this.query.jl,
         sm: this.query.sm,
+        kw: null,
         p: this.query.p
       }
+
+      // 职位类别
       if (this.job_type_selected != null) {
         params.bj = this.job_type_selected.id
         if (this.job_type_selected.child != undefined)
@@ -202,17 +219,34 @@ export default {
         delete params['sj']
       }
 
+      // 行业类别
+      if (this.hangYe_selected != null) {
+        params.in = this.hangYe_selected.id.toString().replace(',', ';')
+      } else {
+        delete params['in']
+      }
+
+      // 关键字
+      if (this.query.kw.trim().length > 0) {
+        params.kw = this.query.kw
+      } else {
+        delete params['kw']
+      }
+
       var query = $.param(params)
       console.log(query)
-      // this.url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
+      this.url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
     },
 
     jobTypesListener: function(v) {
       this.job_type_selected = v
+    },
+    onHangYeSelected: function(v) {
+      this.hangYe_selected = v
     }
   },
   created() {
-    //this.loadPage()
+    // this.loadPage()
   },
   mounted() {},
   updated() {}

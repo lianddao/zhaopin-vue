@@ -1,6 +1,6 @@
 <template>
   <div v-if="show">
-    <h1>软件工程师职位(第{{ current }}页)</h1>
+    <h1>搜索结果:(第{{ current }}页)</h1>
     <ul class="pagination">
       <li v-for="p in pages">
         <a v-if="p.disabled" class="active">{{ p.text }}</a>
