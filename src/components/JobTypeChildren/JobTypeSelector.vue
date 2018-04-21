@@ -68,6 +68,7 @@ export default {
     }
   },
   methods: {
+    // 切换大分类
     toggleAll(checked) {
       if (checked) {
         var r = []
@@ -75,17 +76,19 @@ export default {
           r.push(this.dataset[i].value)
         }
         this.selected = r //全选
-        this.$emit('切换', { id: this.data.id, child: this.selected }, checked)
+        this.$emit(
+          '切换',
+          { id: this.data.id, child: this.selected, isAll: true },
+          checked
+        )
       } else {
         this.selected = [] //全不选
         this.$emit('切换', null)
       }
     },
 
+    // 切换小分类
     toggle: function() {
-      /* 由于 checkbox 事件和 this.selected 不同步的特殊性
-         * 所以不能简单地传递 this.allSelected 和 this.selected
-         * */
       var sel = this.selected.slice(),
         value = event.currentTarget.value,
         checked = event.currentTarget.checked
@@ -99,12 +102,13 @@ export default {
 
       var arg = {
         id: this.data.id,
-        selected: sel,
-        isAll:sel.length==this.dataset.length
+        child: sel,
+        isAll: sel.length == this.dataset.length
       }
-      if (arg.selected.length == 0) arg = null
-      this.$emit('选择孩子项', arg) //向父组件输出孩子项的参考值
+      if (arg.child.length == 0) arg = null
+      this.$emit('选择孩子项', arg) //向父组件输出{id..child..isAll}
     },
+    
     sync_1: function() {
       //this.$parent.showOnlyOne(this.data.id)
       this.$emit('弹出框控制', this.data.id) //向父组件输出全选时的值 this.data.id

@@ -3,7 +3,6 @@
   <div class="container">
     <b-form>
       <!-- 输入关键字 -->
-      <!-- 这里是中国字,上传后会乱码吗? -->
       <b-input-group class="mb-3">
         <b-dropdown :text="sou1" variant="outline-secondary" slot="prepend">
           <b-dropdown-item @click="fun1('请输入关键词,例如:JAVA,销售代表,行政助理等')">职位</b-dropdown-item>
@@ -12,21 +11,30 @@
         <b-form-input required :placeholder="placeholder" v-model="query.kw"></b-form-input>
       </b-input-group>
 
-      <!-- 选择城市 -->
+      <!-- 工作地点 -->
       <b-input-group class="mb-3">
         <b-input-group-prepend>
-          <b-btn id="btn1" variant="outline-info" v-b-modal.modal-center>全国</b-btn>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-center>全国</b-btn>
         </b-input-group-prepend>
         <b-form-input v-model="getDiDian"></b-form-input>
       </b-input-group>
 
-      <!-- 选择职位 -->
+      <!-- 职位类别 -->
       <b-input-group class="mb-3">
         <b-input-group-prepend>
-          <b-btn id="btn1" variant="outline-info" v-b-modal.modal-job-type>职位类别</b-btn>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-job-type>职位类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="getDiDian"></b-form-input>
+        <b-form-input v-model="jobTypeName"></b-form-input>
       </b-input-group>
+
+      <!-- 行业类别 -->
+      <b-input-group class="mb-3">
+        <b-input-group-prepend>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-job-type>行业类别</b-btn>
+        </b-input-group-prepend>
+        <b-form-input v-model="jobTypeName"></b-form-input>
+      </b-input-group>
+
       <b-button type="button" variant="primary" @click="onSubmit">搜索工作</b-button>
     </b-form>
 
@@ -60,6 +68,8 @@
     </b-modal>
     <pre>输出值:{{ job_type_selected }}</pre>
 
+    
+
     <hr />
 
     <h1>热门职位</h1>
@@ -80,7 +90,7 @@ import JobType from './JobType'
 export default {
   data() {
     return {
-      job_type_selected: [],
+      job_type_selected: null,
       allSelected: false,
       indeterminate: false,
 
@@ -88,10 +98,12 @@ export default {
       hot: null,
       sou1: '职位',
       query: {
-        jl: '', //地点
+        bj: '', //职位大分类
+        sj: '', //职位小分类,用 ; 隔开
+        jl: '广州', //地点
         kw: '', //关键字默认属于'职位名'
         sm: 0,
-        //p: 1,     //页码
+        p: 1, //页码
         sf: 0,
         st: 99999,
         kt: 2, //当关键字属于'公司名'
@@ -114,6 +126,19 @@ export default {
     JobType
   },
   computed: {
+    // 行业类别
+
+
+    // 职位类别
+    jobTypeName: {
+      get() {
+        if (this.job_type_selected == null) return null
+        return this.job_type_selected.name
+      },
+      set() {}
+    },
+
+    // 工作地点
     getDiDian: {
       get: function() {
         if (this.selected.length == 0) return ''
@@ -156,20 +181,32 @@ export default {
       this.sou1 = event.target.text
       this.placeholder = placeholder
     },
+
+    // 提交搜索
     onSubmit() {
       //http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E5%B9%BF%E5%B7%9E&kw=asp.net&sm=0&p=1&sf=0&st=99999&isadv=1
       var params = {
-        jl: this.getDiDian,
-        kw: this.query.kw,
+        bj: null,
+        sj: null,
+        jl: this.query.jl,
         sm: this.query.sm,
-        //p: this.query.p,
-        sf: this.query.sf,
-        st: this.query.st,
-        isadv: this.query.isadv
+        p: this.query.p
       }
-      this.url =
-        'http://sou.zhaopin.com/jobs/searchresult.ashx?' + $.param(params)
+      if (this.job_type_selected != null) {
+        params.bj = this.job_type_selected.id
+        if (this.job_type_selected.child != undefined)
+          params.sj = this.job_type_selected.child.toString().replace(',', ';')
+        else delete params['sj']
+      } else {
+        delete params['bj']
+        delete params['sj']
+      }
+
+      var query = $.param(params)
+      console.log(query)
+      // this.url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
     },
+
     jobTypesListener: function(v) {
       this.job_type_selected = v
     }
@@ -188,7 +225,7 @@ export default {
   line-height: 2;
 }
 
-#btn1:after {
+.btn1:after {
   display: inline-block;
   width: 0;
   height: 0;

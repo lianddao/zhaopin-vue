@@ -74,6 +74,7 @@ const City = {
   }
 }
 
+// 职位类别
 const JobType = {
   jobtypeClass: [
     { id: '20', name: '销售|客服|市场' },
@@ -120,16 +121,48 @@ const JobType = {
 
   getJobTypeById: function(id) {
     var r
-    var re=new RegExp("@"+id+"\\|\\S[^@]+") //  /@4000000\|\S[^@]+/
+    var re = new RegExp('@' + id + '\\|\\S[^@]+') //  /@4000000\|\S[^@]+/
     this.dJobtype.replace(re, function(a) {
+      r = a.split('|')[1]
+    })
+    return r
+  },
+
+  getSubJobTypeById(id) {
+    var r
+    var re = new RegExp('@' + id + '\\|\\S[^@]+') //  @\d{3,4}\|\S[^@]+
+    this.dSubjobtype.replace(re, function(a) {
       r = a.split('|')[1]
     })
     return r
   }
 }
 
+// 行业类别
+const HangYeType = {
+  industryClass: [
+    { id: '10100', name: 'IT|通信|电子|互联网' },
+    { id: '10200', name: '金融业' },
+    { id: '10800', name: '房地产|建筑业' },
+    { id: '10900', name: '商业服务' },
+    { id: '10300', name: '贸易|批发|零售|租赁业' },
+    { id: '10400', name: '文体教育|工艺美术' },
+    { id: '10500', name: '生产|加工|制造' },
+    { id: '11500', name: '交通|运输|物流|仓储' },
+    { id: '10000', name: '服务业' },
+    { id: '11300', name: '文化|传媒|娱乐|体育' },
+    { id: '11600', name: '能源|矿产|环保' },
+    { id: '11100', name: '政府|非盈利机构' },
+    { id: '11400', name: '农|林|牧|渔|其他' }
+  ],
+  getHangYe() {
+    return this.industryClass
+  }
+}
+
 export default {
   City,
-  JobType
+  JobType,
+  HangYeType
 }
 </script>

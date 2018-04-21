@@ -1,6 +1,6 @@
 <template>
   <div>
-    <pre>已选择: {{ output }} </pre>
+    <!-- <pre>已选择: {{ output }} </pre> -->
     <table id="table-job" class="table" v-for="i in labels" :key="i.id">
       <tr>
         <th>{{ i.name }}</th>
@@ -31,11 +31,16 @@ export default {
       newActiveId: '',
       output: null,
       valueFormat: function(arg) {
-        if (typeof arg == 'string') {
-          var name = DataSource.JobType.getJobTypeById(id)
-          return { id: arg, name: name }
-        } else if (arg instanceof Array) {
-          return null
+        if (arg.isAll) {
+          var name = DataSource.JobType.getJobTypeById(arg.id)
+          return { id: arg.id, name: name }
+        } else {
+          var name = ''
+          for (var i = 0; i < arg.child.length; i++) {
+            name += DataSource.JobType.getSubJobTypeById(arg.child[i]) + '+'
+          }
+          name = name.slice(0, -1)
+          return { id: arg.id, child: arg.child, name: name }
         }
       }
     }
@@ -43,8 +48,13 @@ export default {
   computed: {},
   created: function() {},
   methods: {
+    //监听子组件的全选切换操作
     onChangeAll(d, checked) {
-      if (this.output !== null && d !== null) {
+      if (d == null) {
+        this.$emit('输出值', null)
+        return
+      }
+      if (this.output !== null) {
         if (this.output.id != d.id) {
           // console.log('清除前一组')
           var old = this.output
@@ -55,15 +65,11 @@ export default {
         }
       }
       this.output = d
+      // this.$emit('输出值', this.valueFormat(this.output.id))
+      this.$emit('输出值', this.valueFormat(this.output))
+    },
 
-      this.$emit('输出值', {
-        id: this.output.id,
-        name: this.valueFormat(this.output.id)
-      })
-    }, //监听子组件的全选切换操作
-
-    //toggleAll对A组进行全选 -> 全不选 -> toggle对B组某项进行选择:出错
-
+    //选择孩子项,同步最终的选择值
     onChange(arg) {
       if (arg != null) {
         if (this.output != null && this.output.id != arg.id) {
@@ -76,23 +82,7 @@ export default {
         }
       }
       this.output = arg
-      if (arg.isAll) {
-        this.$emit('输出值', this.output.id)
-      } else {
-        this.$emit('输出值', this.output.selected)
-      }
-    }, //选择孩子项,同步最终的选择值
-
-    valueFormat1234567(arg) {
-      if (typeof arg == 'string') {
-        debugger
-        var arr = this.DataSource.JobType.getJobTypes(arg)
-
-        return { value: arg, text: '' }
-      } else if (arg instanceof Array) {
-        debugger
-      }
-      return { value: [], text: '' }
+      this.$emit('输出值', this.valueFormat(this.output))
     },
 
     showOnlyOne(id) {
