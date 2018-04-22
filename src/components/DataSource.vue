@@ -176,7 +176,55 @@ const HangYe = {
     // @\d+\|[^\|]+
     // @160000\|[^\|]+
     var re = new RegExp('@' + id + '\\|[^\\|]+')
-    var r= this.dIndustry.match(re)
+    var r = this.dIndustry.match(re)
+    return r[0].split('|')[1]
+  }
+}
+
+// 工作经验
+const JingYan = {
+  dExpe:
+    '@0000|无经验@0001|1年以下@0103|1-3年@0305|3-5年@0510|5-10年@1099|10年以上@',
+  getJingYan: function() {
+    var arr = this.dExpe.split('@')
+    arr.shift()
+    arr.pop()
+    var r = []
+    for (var i = 0; i < arr.length; i++) {
+      var x = arr[i].split('|')
+      var y = { id: x[0], name: x[1] }
+      r.push(y)
+    }
+    return r
+  },
+  getName: function(id) {
+    //@\d+\|[^@]+
+    var re = new RegExp('@' + id + '\\|[^@]+')
+    var r = this.dExpe.match(re)
+    return r[0].split('|')[1]
+  }
+}
+
+// 学历要求
+const XueLi = {
+  dDegree:
+    '@-1|无@7|高中/中专/中技及以下@5|大专及同等学历@4|本科/学士及等同学历@3|硕士/研究生及等同学历@1|博士及以上@8|其他@',
+  getXueLi: function() {
+    var arr = this.dDegree.split('@')
+    arr.shift()
+    arr.pop()
+    var r = []
+    for (var i = 0; i < arr.length; i++) {
+      var x = arr[i].split('|')
+      var y = { id: x[0], name: x[1] }
+      r.push(y)
+    }
+    return r
+  },
+  getName: function(id) {
+    //@\d+\|[^@]+
+    var re = new RegExp('@' + id + '\\|[^@]+')
+    var r = this.dDegree.match(re)
     return r[0].split('|')[1]
   }
 }
@@ -184,6 +232,8 @@ const HangYe = {
 export default {
   City,
   JobType,
-  HangYe
+  HangYe,
+  JingYan,
+  XueLi
 }
 </script>

@@ -1,7 +1,7 @@
 <template>
 
   <div class="container">
-    <b-form>
+    <b-form class="search">
       <!-- 输入关键字 -->
       <b-input-group class="mb-3">
         <b-dropdown :text="sou1" variant="outline-secondary" slot="prepend">
@@ -16,7 +16,7 @@
         <b-input-group-prepend>
           <b-btn class="btn1" variant="outline-info" v-b-modal.modal-center>全国</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="getDiDian"></b-form-input>
+        <b-form-input v-model="cityName"></b-form-input>
       </b-input-group>
 
       <!-- 职位类别 -->
@@ -24,7 +24,7 @@
         <b-input-group-prepend>
           <b-btn class="btn1" variant="outline-info" v-b-modal.modal-job-type>职位类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="jobTypeName"></b-form-input>
+        <b-form-input v-model="jobTypeName" disabled></b-form-input>
       </b-input-group>
 
       <!-- 行业类别 -->
@@ -32,7 +32,23 @@
         <b-input-group-prepend>
           <b-btn class="btn1" variant="outline-info" v-b-modal.modal-hangye>行业类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="hangYeName"></b-form-input>
+        <b-form-input v-model="hangYeName" disabled></b-form-input>
+      </b-input-group>
+
+      <!-- 工作经验 -->
+      <b-input-group class="mb-3">
+        <b-input-group-prepend>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-jingyan>工作经验</b-btn>
+        </b-input-group-prepend>
+        <b-form-input v-model="JingYanName" disabled></b-form-input>
+      </b-input-group>
+
+      <!-- 学历要求 -->
+      <b-input-group class="mb-3">
+        <b-input-group-prepend>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-xueli>学历要求</b-btn>
+        </b-input-group-prepend>
+        <b-form-input v-model="xueLi.name" disabled></b-form-input>
       </b-input-group>
 
       <b-button type="button" variant="primary" @click="onSubmit">搜索工作</b-button>
@@ -68,10 +84,23 @@
     </b-modal>
 
     <!-- 选择行业Modal -->
-    <b-modal id="modal-hangye" centered size="lg" title="选择行业" hide-footer>
+    <b-modal id="modal-hangye" centered title="选择行业" hide-footer>
       <hang-ye v-on:选择行业="onHangYeSelected"></hang-ye>
     </b-modal>
-    <pre>输出值:{{ hangYe_selected }}</pre>
+
+    <!-- 选择工作经验Modal -->
+    <b-modal id="modal-jingyan" centered title="选择工作经验" hide-footer>
+      <jing-yan v-on:选择工作经验="onJingYanSelected"></jing-yan>
+    </b-modal>
+
+    <!-- 选择学历要求Modal -->
+    <b-modal id="modal-xueli" centered title="选择学历要求" hide-footer>
+      <xue-li v-on:选择学历要求="onXueLiSelected"></xue-li>
+    </b-modal>
+
+    <pre>输出值:{{ xueLi }}</pre>
+
+    <job-list-view dataset="default_job_list"></job-list-view>
 
     <hr />
 
@@ -90,10 +119,20 @@ import CityPop from './CityPop'
 import Result from './Job'
 import JobType from './JobType'
 import HangYe from './JobSearchChildren/HangYeSelector'
+import JingYan from './JobSearchChildren/JingYanSelector'
+import XueLi from './JobSearchChildren/XueLiSelector'
+import JobListView from './JobSearchChildren/Result'
 
 export default {
   data() {
     return {
+      // 该值是智联招聘的高级搜索页地址.可从中获取'工作地点'的初始值
+      default_ur: 'http://sou.zhaopin.com/jobs/searchresult.ashx?isadv=1',
+      default_city: '',
+      default_job_list: [],
+
+      xueLi: { id: null, name: '不限' },
+      jingYan_selected: null,
       hangYe_selected: null,
       job_type_selected: null,
       allSelected: false,
@@ -113,6 +152,7 @@ export default {
         sf: 0,
         st: 99999,
         kt: 2, //当关键字属于'公司名'
+        we: '', //工作经验
         isadv: 1 //...
       },
       placeholder: '请输入关键词,例如:JAVA,销售代表,行政助理等',
@@ -130,13 +170,34 @@ export default {
     CityPop,
     Result,
     JobType,
-    HangYe
+    HangYe,
+    JingYan,
+    XueLi,
+    JobListView
   },
   computed: {
+    // 学历要求
+    // XueLiName: {
+    //   get() {
+    //     if (this.xueLi.id == null) return '不限'
+    //     return this.xueLi.name
+    //   },
+    //   set() {}
+    // },
+
+    // 工作经验
+    JingYanName: {
+      get() {
+        if (this.jingYan_selected == null) return '不限'
+        return this.jingYan_selected.name
+      },
+      set() {}
+    },
+
     // 行业类别
     hangYeName: {
       get() {
-        if (this.hangYe_selected == null) return null
+        if (this.hangYe_selected == null) return '选择行业'
         return this.hangYe_selected.name
       },
       set() {}
@@ -145,16 +206,16 @@ export default {
     // 职位类别
     jobTypeName: {
       get() {
-        if (this.job_type_selected == null) return null
+        if (this.job_type_selected == null) return '选择职位'
         return this.job_type_selected.name
       },
       set() {}
     },
 
     // 工作地点
-    getDiDian: {
-      get: function() {
-        if (this.selected.length == 0) return ''
+    cityName: {
+      get() {
+        if (this.selected.length == 0) return this.default_city
         var r = []
         for (var i = 0; i < this.selected.length; i++) {
           for (var j = 0; j < this.city.length; j++) {
@@ -171,10 +232,26 @@ export default {
         if (r.length > 0) this.query.jl = this.query.jl.slice(0, -1)
         return this.query.jl
       },
-      set: function() {}
+      set() {}
     }
   },
   methods: {
+    // 加载高级搜索页
+    loadDefaultUrl: function() {
+      var _findListData = function(dom) {
+        dom.find('#newlist_list_div .newlist').each(function(i, n) {
+          console.log(n)
+        })
+      }
+
+      // let self = this
+      // $.get(self.default_ur, function(html) {
+      //   var dom = $(html)
+      //   self.default_city = dom.find('#JobLocation').val()
+      //   _findListData(dom)
+      // })
+    },
+
     loadPage: function() {
       var href = 'http://sou.zhaopin.com/'
       this.url = href
@@ -188,6 +265,7 @@ export default {
         })
       })
     },
+
     fun1(placeholder) {
       //&p=1&kt=2&isadv=0 公司名
       //& p=1 & isadv=0	职位
@@ -205,14 +283,16 @@ export default {
         jl: this.query.jl,
         sm: this.query.sm,
         kw: null,
-        p: this.query.p
+        // p: this.query.p,
+        we: null,
+        el: null // 学历
       }
 
       // 职位类别
       if (this.job_type_selected != null) {
         params.bj = this.job_type_selected.id
         if (this.job_type_selected.child != undefined)
-          params.sj = this.job_type_selected.child.toString().replace(',', ';')
+          params.sj = this.job_type_selected.child.toString().replace(/,/g, ';')
         else delete params['sj']
       } else {
         delete params['bj']
@@ -221,7 +301,7 @@ export default {
 
       // 行业类别
       if (this.hangYe_selected != null) {
-        params.in = this.hangYe_selected.id.toString().replace(',', ';')
+        params.in = this.hangYe_selected.id.toString().replace(/,/g, ';')
       } else {
         delete params['in']
       }
@@ -233,9 +313,23 @@ export default {
         delete params['kw']
       }
 
+      // 工作经验
+      if (this.jingYan_selected != null) {
+        params.we = this.jingYan_selected.id.toString().replace(/,/g, ';')
+      } else {
+        delete params['we']
+      }
+
+      // 学历要求
+      if (this.xueLi.id != null) {
+        params.el = this.xueLi.id.toString().replace(/,/g, ';')
+      } else {
+        delete params['el']
+      }
+
       var query = $.param(params)
-      console.log(query)
       this.url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
+      console.log(this.url)
     },
 
     jobTypesListener: function(v) {
@@ -243,10 +337,17 @@ export default {
     },
     onHangYeSelected: function(v) {
       this.hangYe_selected = v
+    },
+    onJingYanSelected: function(v) {
+      this.jingYan_selected = v
+    },
+    onXueLiSelected: function(v) {
+      this.xueLi = v
     }
   },
   created() {
-    // this.loadPage()
+    this.loadPage()
+    // this.loadDefaultUrl()
   },
   mounted() {},
   updated() {}
@@ -255,7 +356,6 @@ export default {
 
 <style>
 .list-inline li {
-  /*box-shadow: 1px 1px 5px #000;*/
   line-height: 2;
 }
 
@@ -351,5 +451,9 @@ export default {
     overflow-y: auto;
     overflow-x: hidden;
   }
+}
+
+input[type='text'][disabled='disabled'] {
+  background-color: inherit;
 }
 </style>
