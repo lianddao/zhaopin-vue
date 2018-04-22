@@ -100,7 +100,7 @@
 
     <pre>输出值:{{ xueLi }}</pre>
 
-    <job-list-view dataset="default_job_list"></job-list-view>
+    <job-list-view :items="default_job_list"></job-list-view>
 
     <hr />
 
@@ -122,6 +122,43 @@ import HangYe from './JobSearchChildren/HangYeSelector'
 import JingYan from './JobSearchChildren/JingYanSelector'
 import XueLi from './JobSearchChildren/XueLiSelector'
 import JobListView from './JobSearchChildren/Result'
+
+const HtmlFormat = {
+  findListData: function(dom) {
+    var r = []
+    dom.find('#newlist_list_div .newlist:not(:eq(0))').each(function(i, n) {
+      var x = {}
+      $(n)
+        .find('td')
+        .each(function(j, m) {
+          switch (j) {
+            case 0:
+              var a = $(m).find('a')
+              x.职位链接 = a.attr('href')
+              x.职位名称 = a.text()
+              break
+            case 2:
+              var a = $(m).find('a')
+              x.公司链接 = a.attr('href')
+              x.公司名称 = a.text()
+              break
+            case 3:
+              x.职位月薪 = $(m).text()
+              break
+            case 4:
+              x.工作地点 = $(m).text()
+              break
+            case 6:
+              x.详情 = $(m).html()
+              break
+          }
+        })
+      r.push(x)
+    })
+    console.log(r[0])
+    return r
+  }
+}
 
 export default {
   data() {
@@ -176,15 +213,6 @@ export default {
     JobListView
   },
   computed: {
-    // 学历要求
-    // XueLiName: {
-    //   get() {
-    //     if (this.xueLi.id == null) return '不限'
-    //     return this.xueLi.name
-    //   },
-    //   set() {}
-    // },
-
     // 工作经验
     JingYanName: {
       get() {
@@ -238,18 +266,11 @@ export default {
   methods: {
     // 加载高级搜索页
     loadDefaultUrl: function() {
-      var _findListData = function(dom) {
-        dom.find('#newlist_list_div .newlist').each(function(i, n) {
-          console.log(n)
-        })
-      }
-
-      // let self = this
-      // $.get(self.default_ur, function(html) {
-      //   var dom = $(html)
-      //   self.default_city = dom.find('#JobLocation').val()
-      //   _findListData(dom)
-      // })
+      $.get(this.default_ur, html => {
+        var dom = $(html)
+        this.default_city = dom.find('#JobLocation').val()
+        this.default_job_list = HtmlFormat.findListData(dom)
+      })
     },
 
     loadPage: function() {
