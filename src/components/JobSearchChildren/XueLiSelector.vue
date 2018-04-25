@@ -1,18 +1,18 @@
 // 学历要求
 <template>
-    <div>
-        <b-list-group>
-            <b-list-group-item v-for="i in dataset" :key="i.id">
-                <b-form-checkbox :disabled="selected.length > 4 && selected.indexOf(i.id) === -1" :value="i.id" v-model="selected">
-                    {{i.id +','+ i.name }}
-                </b-form-checkbox>
-            </b-list-group-item>
-        </b-list-group>
-    </div>
+  <div>
+    <b-list-group>
+      <b-list-group-item v-for="i in dataset" :key="i.id">
+        <b-form-checkbox :disabled="selected.length > 4 && selected.indexOf(i.id) === -1" :value="i.id" v-model="selected">
+          {{i.id +','+ i.name }}
+        </b-form-checkbox>
+      </b-list-group-item>
+    </b-list-group>
+  </div>
 </template>
 
 <script>
-import DataSource from '../DataSource'
+import DataSource from '../_DataSource'
 
 export default {
   data: function() {

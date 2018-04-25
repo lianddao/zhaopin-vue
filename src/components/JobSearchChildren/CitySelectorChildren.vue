@@ -39,12 +39,12 @@
 
 
 <script>
-import DataSource from '../DataSource'
+import DataSource from '../_DataSource'
 
 export default {
   data() {
     return {
-      dataset: this.childrens, //①:dataset: this.getChildrens 无效.要在 created 中赋值.(因为: vue组件在其声明周期的 data 部分时并没有获得界面,所以没有界面的呈现)
+      dataset: null, //①:dataset: this.getChildrens 无效.要在 created 中赋值.(因为: vue组件在其声明周期的 data 部分时并没有获得界面,所以没有界面的呈现)
       selected: [],
       allSelected: false,
       indeterminate: false
@@ -60,7 +60,7 @@ export default {
   computed: {
     getChildrens: function() {
       var r = []
-      var arr = DataSource.JobType.getSubJobTypes(this.data.id)
+      var arr = DataSource.ZhiWei.getSubJobTypes(this.data.id)
       for (var i = 0; i < arr.length; i++) {
         r.push({ text: arr[i].name, value: arr[i].id }) //②经验证,必须使用 {text,value} 格式的数据,'具有 indeterminate 特性的多选框组'才会正常生效
       }

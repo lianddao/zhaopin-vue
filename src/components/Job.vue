@@ -87,7 +87,7 @@ export default {
         let self = this
         var dom = $(html)
 
-        //② 取得所有行数据，加入rows中
+        //② 取得本页的职位数据，加入rows中
         var rows = []
         dom
           .find('#newlist_list_content_table .newlist:not(:first)')
@@ -230,7 +230,7 @@ function replaceUnknown(json) {
 }
 </style>
 
-<style>
+<stylem scoped>
 /*分页*/
 ul.pagination {
   display: inline-block;

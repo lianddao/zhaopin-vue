@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import DataSource from '../DataSource'
+import DataSource from '../_DataSource'
 
 export default {
   data: function() {

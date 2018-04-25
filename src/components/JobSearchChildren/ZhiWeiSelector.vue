@@ -15,29 +15,32 @@
 </template>
 
 <script>
-import DataSource from './DataSource'
-import Selector from './JobTypeChildren/JobTypeSelector'
+import DataSource from '../_DataSource'
+import Selector from './ZhiWeiSelectorChildren'
 
 export default {
   data() {
     return {
-      labels: DataSource.JobType.getLabels(),
+      labels: DataSource.ZhiWei.getLabels(),
       types: function(id) {
-        return DataSource.JobType.getJobTypes(id)
+        return DataSource.ZhiWei.getJobTypes(id)
       },
       getSubTypes: function(pid) {
-        return DataSource.JobType.getSubJobTypes(pid)
+        return DataSource.ZhiWei.getSubJobTypes(pid)
       },
       newActiveId: '',
       output: null,
       valueFormat: function(arg) {
+        if (arg == null) {
+          return { id: null, name: '不限' }
+        }
         if (arg.isAll) {
-          var name = DataSource.JobType.getJobTypeById(arg.id)
+          var name = DataSource.ZhiWei.getJobTypeById(arg.id)
           return { id: arg.id, name: name }
         } else {
           var name = ''
           for (var i = 0; i < arg.child.length; i++) {
-            name += DataSource.JobType.getSubJobTypeById(arg.child[i]) + '+'
+            name += DataSource.ZhiWei.getSubJobTypeById(arg.child[i]) + '+'
           }
           name = name.slice(0, -1)
           return { id: arg.id, child: arg.child, name: name }
@@ -51,7 +54,7 @@ export default {
     //监听子组件的全选切换操作
     onChangeAll(d, checked) {
       if (d == null) {
-        this.$emit('输出值', null)
+        this.$emit('输出值', this.valueFormat(null))
         return
       }
       if (this.output !== null) {
@@ -65,7 +68,6 @@ export default {
         }
       }
       this.output = d
-      // this.$emit('输出值', this.valueFormat(this.output.id))
       this.$emit('输出值', this.valueFormat(this.output))
     },
 

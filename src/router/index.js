@@ -1,11 +1,9 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import HelloWorld from '@/components/HelloWorld'
 import Job from '@/components/Job'
 import JobInfo from '@/components/JobInfo'
 import Sou from '@/components/Sou'
-import JobType from '@/components/JobType'
-import HangYeSelector from '@/components/JobSearchChildren/HangYeSelector'
+import City from '@/components/JobSearchChildren/CitySelector'
 
 Vue.use(Router)
 
@@ -13,9 +11,10 @@ export default new Router({
   routes: [
     {
       path: '/',
-      name: 'HelloWorld',
-      component: HelloWorld
-    },
+      name: '职位搜索',
+      component: Sou
+    }
+    ,
     {
       path: '/job',
       name: '职位列表',
@@ -27,16 +26,8 @@ export default new Router({
       component: JobInfo
     },
     {
-      path: '/sou',
-      component: Sou
-    },
-    {
-      path: '/jobtype',
-      component: JobType
-    },
-    {
-      path: '/hangye',
-      component: HangYeSelector
+      path:'/city',
+      component:City
     }
   ]
 })

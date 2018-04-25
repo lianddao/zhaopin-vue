@@ -68,14 +68,14 @@ const City = {
       if (b[i] != '' && ((d = this.getCById(this.city, b[i])), d.length)) {
         h = d[0][0]
         d = d[0][1]
-        r.push({ value: h, text: d })
+        r.push({ id: h, name: d })
       }
     return r
   }
 }
 
 // 职位类别
-const JobType = {
+const ZhiWei = {
   jobtypeClass: [
     { id: '20', name: '销售|客服|市场' },
     { id: '21', name: '财务|人力资源|行政' },
@@ -231,7 +231,7 @@ const XueLi = {
 
 export default {
   City,
-  JobType,
+  ZhiWei,
   HangYe,
   JingYan,
   XueLi

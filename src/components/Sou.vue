@@ -14,7 +14,7 @@
       <!-- 工作地点 -->
       <b-input-group class="mb-3">
         <b-input-group-prepend>
-          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-center>全国</b-btn>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-city>全国</b-btn>
         </b-input-group-prepend>
         <b-form-input v-model="cityName"></b-form-input>
       </b-input-group>
@@ -22,9 +22,9 @@
       <!-- 职位类别 -->
       <b-input-group class="mb-3">
         <b-input-group-prepend>
-          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-job-type>职位类别</b-btn>
+          <b-btn class="btn1" variant="outline-info" v-b-modal.modal-zhiwei>职位类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="jobTypeName" disabled></b-form-input>
+        <b-form-input v-model="zhiWei.name" disabled></b-form-input>
       </b-input-group>
 
       <!-- 行业类别 -->
@@ -32,7 +32,7 @@
         <b-input-group-prepend>
           <b-btn class="btn1" variant="outline-info" v-b-modal.modal-hangye>行业类别</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="hangYeName" disabled></b-form-input>
+        <b-form-input v-model="hangYe.name" disabled></b-form-input>
       </b-input-group>
 
       <!-- 工作经验 -->
@@ -40,7 +40,7 @@
         <b-input-group-prepend>
           <b-btn class="btn1" variant="outline-info" v-b-modal.modal-jingyan>工作经验</b-btn>
         </b-input-group-prepend>
-        <b-form-input v-model="JingYanName" disabled></b-form-input>
+        <b-form-input v-model="jingYan.name" disabled></b-form-input>
       </b-input-group>
 
       <!-- 学历要求 -->
@@ -54,8 +54,8 @@
       <b-button type="button" variant="primary" @click="onSubmit">搜索工作</b-button>
     </b-form>
 
-    <!-- 选择地区Modal -->
-    <b-modal id="modal-center" centered size="lg" title="选择地区" hide-footer>
+    <!-- 选择城市Modal -->
+    <b-modal id="modal-city" centered size="lg" title="选择地区" hide-footer>
       <b-form-group class="row" label="主要城市">
         <b-form-checkbox-group id="checkboxes2" name="flavour2" v-model="selected">
           <b-form-checkbox v-for="i in city" :value="i.value" :key="i.value" class="col-5 col-sm-3 col-md-2">{{ i.text }}</b-form-checkbox>
@@ -79,8 +79,8 @@
     </b-modal>
 
     <!-- 选择职位Modal -->
-    <b-modal id="modal-job-type" centered size="lg" title="选择职位" hide-footer>
-      <job-type v-on:输出值="jobTypesListener"></job-type>
+    <b-modal id="modal-zhiwei" centered size="lg" title="选择职位" hide-footer>
+      <zhi-wei v-on:输出值="onZhiWeiSelected"></zhi-wei>
     </b-modal>
 
     <!-- 选择行业Modal -->
@@ -98,67 +98,20 @@
       <xue-li v-on:选择学历要求="onXueLiSelected"></xue-li>
     </b-modal>
 
-    <pre>输出值:{{ xueLi }}</pre>
-
-    <job-list-view :items="default_job_list"></job-list-view>
-
-    <hr />
-
-    <!-- <h1>热门职位</h1>
-    <ul class="list-inline row">
-      <li class="col-xs-6 col-sm-6 col-md-3" v-for="i in hot" :key="i.id">{{ i.name }}</li>
-    </ul> -->
-    <result :queryUrl="url"></result>
+    <!--  搜索结果 -->
+    <search-result :SearchUrl="default_ur" style="margin-top:25px"></search-result>
 
   </div>
 </template>
 
 <script>
-import DataSource from './DataSource'
-import CityPop from './CityPop'
-import Result from './Job'
-import JobType from './JobType'
+import DataSource from './_DataSource'
+import ZhiWei from './JobSearchChildren/ZhiWeiSelector'
 import HangYe from './JobSearchChildren/HangYeSelector'
 import JingYan from './JobSearchChildren/JingYanSelector'
 import XueLi from './JobSearchChildren/XueLiSelector'
-import JobListView from './JobSearchChildren/Result'
-
-const HtmlFormat = {
-  findListData: function(dom) {
-    var r = []
-    dom.find('#newlist_list_div .newlist:not(:eq(0))').each(function(i, n) {
-      var x = {}
-      $(n)
-        .find('td')
-        .each(function(j, m) {
-          switch (j) {
-            case 0:
-              var a = $(m).find('a')
-              x.职位链接 = a.attr('href')
-              x.职位名称 = a.text()
-              break
-            case 2:
-              var a = $(m).find('a')
-              x.公司链接 = a.attr('href')
-              x.公司名称 = a.text()
-              break
-            case 3:
-              x.职位月薪 = $(m).text()
-              break
-            case 4:
-              x.工作地点 = $(m).text()
-              break
-            case 6:
-              x.详情 = $(m).html()
-              break
-          }
-        })
-      r.push(x)
-    })
-    console.log(r[0])
-    return r
-  }
-}
+import SearchResult from './JobSearchChildren/SearchResult'
+import Tool from './_Tool'
 
 export default {
   data() {
@@ -166,16 +119,16 @@ export default {
       // 该值是智联招聘的高级搜索页地址.可从中获取'工作地点'的初始值
       default_ur: 'http://sou.zhaopin.com/jobs/searchresult.ashx?isadv=1',
       default_city: '',
-      default_job_list: [],
+      default_job_list: null,
+      current_page: 1,
 
       xueLi: { id: null, name: '不限' },
-      jingYan_selected: null,
-      hangYe_selected: null,
-      job_type_selected: null,
+      jingYan: { id: null, name: '不限' },
+      hangYe: { id: null, name: '不限' },
+      zhiWei: { id: null, name: '不限' },
       allSelected: false,
       indeterminate: false,
 
-      url: '',
       hot: null,
       sou1: '职位',
       query: {
@@ -204,42 +157,14 @@ export default {
   },
   components: {
     DataSource,
-    CityPop,
-    Result,
-    JobType,
+    ZhiWei,
     HangYe,
     JingYan,
     XueLi,
-    JobListView
+    SearchResult,
+    Tool
   },
   computed: {
-    // 工作经验
-    JingYanName: {
-      get() {
-        if (this.jingYan_selected == null) return '不限'
-        return this.jingYan_selected.name
-      },
-      set() {}
-    },
-
-    // 行业类别
-    hangYeName: {
-      get() {
-        if (this.hangYe_selected == null) return '选择行业'
-        return this.hangYe_selected.name
-      },
-      set() {}
-    },
-
-    // 职位类别
-    jobTypeName: {
-      get() {
-        if (this.job_type_selected == null) return '选择职位'
-        return this.job_type_selected.name
-      },
-      set() {}
-    },
-
     // 工作地点
     cityName: {
       get() {
@@ -268,22 +193,8 @@ export default {
     loadDefaultUrl: function() {
       $.get(this.default_ur, html => {
         var dom = $(html)
+        this.default_ur = Tool.HtmlFormat.findDefaultUrl(dom)
         this.default_city = dom.find('#JobLocation').val()
-        this.default_job_list = HtmlFormat.findListData(dom)
-      })
-    },
-
-    loadPage: function() {
-      var href = 'http://sou.zhaopin.com/'
-      this.url = href
-      let self = this
-      $.get(href, function(html) {
-        var dom = $(html)
-        self.hot = []
-        dom.find('.search_topcontent_main a').each(function() {
-          var i = { name: $(this).text(), href: $(this).attr('href') }
-          self.hot.push(i)
-        })
       })
     },
 
@@ -293,6 +204,8 @@ export default {
       this.sou1 = event.target.text
       this.placeholder = placeholder
     },
+
+    onPagination: function() {},
 
     // 提交搜索
     onSubmit() {
@@ -310,10 +223,10 @@ export default {
       }
 
       // 职位类别
-      if (this.job_type_selected != null) {
-        params.bj = this.job_type_selected.id
-        if (this.job_type_selected.child != undefined)
-          params.sj = this.job_type_selected.child.toString().replace(/,/g, ';')
+      if (this.zhiWei.id != null) {
+        params.bj = this.zhiWei.id
+        if (this.zhiWei.child != undefined)
+          params.sj = this.zhiWei.child.toString().replace(/,/g, ';')
         else delete params['sj']
       } else {
         delete params['bj']
@@ -321,22 +234,15 @@ export default {
       }
 
       // 行业类别
-      if (this.hangYe_selected != null) {
-        params.in = this.hangYe_selected.id.toString().replace(/,/g, ';')
+      if (this.hangYe.id != null) {
+        params.in = this.hangYe.id.toString().replace(/,/g, ';')
       } else {
         delete params['in']
       }
 
-      // 关键字
-      if (this.query.kw.trim().length > 0) {
-        params.kw = this.query.kw
-      } else {
-        delete params['kw']
-      }
-
       // 工作经验
-      if (this.jingYan_selected != null) {
-        params.we = this.jingYan_selected.id.toString().replace(/,/g, ';')
+      if (this.jingYan.id != null) {
+        params.we = this.jingYan.id.toString().replace(/,/g, ';')
       } else {
         delete params['we']
       }
@@ -348,27 +254,34 @@ export default {
         delete params['el']
       }
 
+      // 关键字
+      if (this.query.kw.trim().length > 0) {
+        params.kw = this.query.kw
+      } else {
+        delete params['kw']
+      }
+
       var query = $.param(params)
-      this.url = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
-      console.log(this.url)
+      this.default_ur = 'http://sou.zhaopin.com/jobs/searchresult.ashx?' + query
+      console.log(this.default_ur)
     },
 
-    jobTypesListener: function(v) {
-      this.job_type_selected = v
+    onZhiWeiSelected: function(v) {
+      this.zhiWei = v
     },
     onHangYeSelected: function(v) {
-      this.hangYe_selected = v
+      this.hangYe = v
     },
     onJingYanSelected: function(v) {
-      this.jingYan_selected = v
+      this.jingYan = v
     },
     onXueLiSelected: function(v) {
       this.xueLi = v
     }
   },
   created() {
-    this.loadPage()
-    // this.loadDefaultUrl()
+    // this.loadPage()
+    this.loadDefaultUrl()
   },
   mounted() {},
   updated() {}

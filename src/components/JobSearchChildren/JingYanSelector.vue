@@ -12,7 +12,7 @@
 </template>
 
 <script>
-import DataSource from '../DataSource'
+import DataSource from '../_DataSource'
 
 export default {
   data: function() {
@@ -33,7 +33,11 @@ export default {
       for (var i = 0; i < newVal.length; i++) {
         name += this.getName(newVal[i]) + '+'
       }
-      this.$emit('选择工作经验', { id: newVal, name: name.slice(0, -1) })
+      if (name.length == 0) {
+        this.$emit('选择工作经验', { id: null, name: '不限' })
+      } else {
+        this.$emit('选择工作经验', { id: newVal, name: name.slice(0, -1) })
+      }
     }
   }
 }
